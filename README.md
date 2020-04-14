@@ -2,9 +2,7 @@
 
 ## Summary
 
-This repository contains project materials Environmental Justice
-State of California
-The aim of the project is to investigate the effects of environmental indicators on community health characteristics using teh CalEnviroScreen 3.0 data set. 
+The aim of the project is to investigate and report on the effects of environmental indicators on community health characteristics in the State of California using the CalEnviroScreen 3.0 data set. All project related materials can be found within this repository. 
 
 ## Investigators
 
