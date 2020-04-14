@@ -5,9 +5,9 @@ output:
     fig_caption: yes
     number_sections: yes
 geometry: margin=2.54cm
-title: "Insert title of project here"
-subtitle: "Web address for GitHub repository"
-author: "Name"
+title: "Environmental Justice in the State of California"
+subtitle: "https://github.com/tih7/ENV872-DA_FinalProject_Husseini-T.git"
+author: "Tamera Husseini"
 fontsize: 12pt
 mainfont: Times New Roman
 
@@ -26,10 +26,13 @@ mainfont: Times New Roman
 
 # Load your packages
 
+library(tidyverse)
+
 # Set your ggplot theme
 
 # Load your datasets
 
+CaliEJScreen <- read.csv()
 ```
 
 
