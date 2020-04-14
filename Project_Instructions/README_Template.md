@@ -11,7 +11,10 @@
 
 ## Investigators
 
-<name(s), affiliation(s), contact information, roles (if applicable)>
+Tamera Husseini 
+Master of Environmental Management, CEM
+Nicholas School of the Environment, Duke University
+tamera.husseini@duke.edu
 
 ## Keywords
 
@@ -25,6 +28,8 @@
 ## Folder structure, file formats, and naming conventions 
 
 <describe the folders contained in the repository, including what type of files they contain>
+
+data
 
 <describe the formats of files for the various purposes contained in the repository>
 
