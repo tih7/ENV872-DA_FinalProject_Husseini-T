@@ -32,7 +32,7 @@ Data was downloaded on 2020-04-14.
 1. The **data** folder contains two sub-folders, **data_raw** and **data_processed** data.  All data files are saved as .csv. 
 2. The **scripts** folder contains all R scripts (.R, .Rmd etc.) used for data wrangling and project analysis. 
 3. The **output** folder contains visuals saved as .png
-4. The **docs** folder contains the final project report and a sub-folder called **docs_supplement**. The sub-folder contains project related supplementary materials such as PDF reports, word docs etc.  
+4. The **docs** folder contains the final project report and a sub-folder called **docs_supplement**. The sub-folder contains project related supplementary materials such as PDFs, word docs etc.  
 
 
 All file naming conventions are as follows:
@@ -45,13 +45,13 @@ All file naming conventions are as follows:
 
   *Source*: the source of the document of data or, althernatively, the initials of the document author.
 
-  *Version*: the version number or decriptor e.g. v1, v2, draft, final etc. 
+  *Version*: the version number or descriptor e.g. v1, v2, draft, final etc. 
 
   *Format*: refers to the files extension e.g. csv, txt etc.  
 
 ## Metadata
 
-The data is saved as single csv file titled "2020-04-14_CalEnviroScreen" and can be found in the **data_raw** subfolder. An Excel file version of the data can be also be found in the **docs_supplement** folder. 
+The data set is saved as single csv file titled "2020-04-14_CalEnviroScreen_IndicatorData_raw.csv" and can be found in the **data_raw** subfolder. An Excel file version of the data can be also be found in the **docs_supplement** folder. 
 
 ##### Data variables ##### 
 
@@ -104,8 +104,6 @@ Socio-economic Factor Indicators:
 * Poverty: Percent of population living below two times the federal poverty level.
 * Unemployment: Percent of the population over the age of 16 that is unemployed and eligible for the labor force.
 * Housing Burden: Percent housing burdened low income households. 
-
-<For each data file in the repository, describe the data contained in each column. Include the column name, a description of the information, the class of data, and any units associated with the data. Create a list or table for each data file.> 
 
 ## Scripts and code
 
