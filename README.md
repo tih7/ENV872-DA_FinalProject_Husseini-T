@@ -4,7 +4,7 @@
 
 The aim of the project is to investigate and report on the effects of environmental indicators on community health characteristics in the State of California using the CalEnviroScreen 3.0 data set. All project related materials can be found within this repository. 
 
-## Investigators
+## Investigator
 
 Tamera Husseini 
 
@@ -29,7 +29,7 @@ Data was downloaded on 2020-04-14.
 ## Folder structure, file formats, and naming conventions 
 
 
-1. The **data** folder contains two sub-folders, **data_raw** and **data_processed** data.  All data files are saved as .csv. 
+1. The **data** folder contains three sub-folders, **data_raw**, **data_processed** and **data_spatial**.  Files contained in the raw and processed folders are saved as .csv. Files contained in the spatial folder are .shp.  
 2. The **scripts** folder contains all R scripts (.R, .Rmd etc.) used for data wrangling and project analysis. 
 3. The **output** folder contains visuals saved as .png
 4. The **docs** folder contains the final project report and a sub-folder called **docs_supplement**. The sub-folder contains project related supplementary materials such as PDFs, word docs etc.  
