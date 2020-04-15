@@ -1,0 +1,84 @@
+---
+output: 
+  pdf_document:
+    keep_tex: yes
+    fig_caption: yes
+    number_sections: yes
+geometry: margin=2.54cm
+title: "Environmental Justice in the State of California"
+subtitle: "https://github.com/tih7/ENV872-DA_FinalProject_Husseini-T.git"
+author: "Tamera Husseini"
+fontsize: 12pt
+mainfont: Times New Roman
+
+---
+
+\newpage
+\tableofcontents 
+\newpage
+\listoftables 
+\newpage
+\listoffigures 
+\newpage
+
+```{r setup, include=FALSE}
+# Set your working directory
+
+getwd()
+
+# Load your packages
+
+library(tidyverse)
+
+# Set your ggplot theme
+
+my_theme <- theme_light(base_size = 12) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right")
+  
+theme_set(my_theme)
+
+# Load your datasets
+
+caliEJscreen <- read.csv("./data/data_raw/2020-04-14_caliEJscreen.csv")
+```
+
+
+# Rationale and Research Questions
+
+
+
+\newpage
+
+# Dataset Information
+
+
+
+\newpage
+
+# Exploratory Analysis 
+
+
+
+\newpage
+
+# Analysis
+
+
+
+## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
+
+## Question 2: 
+
+
+
+
+\newpage
+
+# Summary and Conclusions
+
+
+\newpage
+
+# References
+<add references here if relevant, otherwise delete this section> 
