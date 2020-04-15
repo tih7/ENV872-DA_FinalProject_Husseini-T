@@ -112,6 +112,7 @@ Socio-economic Factor Indicators:
 3. Visualisations
 
 ## Quality assurance/quality control
+NA values have already been removed from the data set.
 
 <describe any relevant QA/QC procedures taken with your data. Some ideas can be found here:>
 <https://www.dataone.org/best-practices/develop-quality-assurance-and-quality-control-plan>
