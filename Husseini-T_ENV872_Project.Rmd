@@ -52,6 +52,11 @@ caliEJscreen <- read.csv("./data/data_raw/cali_ej_screen.csv")
 
 # Dataset Information
 
+The data set used in this study is an aggregate of environmental, health and socioeconomic indicator data for the State of California, downloaded from CalEnviroScreen 3.0, an environmental justice mapping tool developed by the California Office of Environmental Health Hazard Assessment (OEHHA). The CalEnviroScreen data set combines 20 indicator datas categorized broadly as : (1) geographic and demographic data, (2) exposure indicators, (3) enviornmental effects indicators, (4) sensitive population indicators and (5) socio-economic indicators. In addition to the raw indicator data,  derive a rank score. An area with a high score is one that experiences a much higher pollution burden than areas with low scores. The tool was designed to help identify California communities that are most affected by many sources of pollution. The data is divided along 2010 census tracts and is up-to-date as of 2018. 
+
+More information about CalEnviroScreen 3.0 can be found here: https://oehha.ca.gov/calenviroscreen/about-calenviroscreen
+
+
 
 
 \newpage
