@@ -65,6 +65,8 @@ Geographic and Demographic Data:
 * Longtitude:Longtitude at the center of the census tract in decimal degrees
 * Latitude: Latitude of the census in decimal degrees
 
+CaliEnvironScreen Rank Score
+
 * CES 3.0 Score: CalEnviroScreen Score, Pollution Score multiplied by Population Characteristics Score
 * CES 3.0 Percentile: Percentile of the CalEnviroScreen score
 * CES 3.0 Percentile Range: Percentile of the CalEnviroScreen score
@@ -79,7 +81,7 @@ Exposure Indicators:
 * PM2.5: Annual mean PM 2.5 concentration
 * Diesel PM: Diesel PM emission from on-road and non-road sources
 * Drinking Water: Drinking water contaminant index for selected contaminnats
-* Pesticides: Total pounds of selected active pesticide ingredients (filtered for hazard and volatility) used in production-agriculture per square mile in the census tract. 
+* Pesticides: Total pounds of selected active pesticide ingredients (filtered for hazard and volatility) used in production-agriculture per square mile in the census tract.
 * Tox. Release: Toxicity-weighted concentrations of modeled chemical releases to air from facility emissions and off-site incineration (from RSEI)
 * Traffic: Traffic density, in vehicle-kilometers per hour per road length, within 150 meters of the census tract boundary
 
@@ -115,6 +117,8 @@ Socio-economic Factor Indicators:
 NA values have already been removed from the data set.
 
 <describe any relevant QA/QC procedures taken with your data. Some ideas can be found here:>
+
+NA values have already been removed from the data 
 <https://www.dataone.org/best-practices/develop-quality-assurance-and-quality-control-plan>
 <https://www.dataone.org/best-practices/ensure-basic-quality-control>
 <https://www.dataone.org/best-practices/communicate-data-quality>
