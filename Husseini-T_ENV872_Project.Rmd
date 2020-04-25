@@ -5,7 +5,7 @@ output:
     fig_caption: yes
     number_sections: yes
 geometry: margin=2.54cm
-title: "Environmental Health and Justice in California"
+title: "Environmental Health and Justice in 10 California Counties"
 subtitle: "https://github.com/tih7/ENV872-DA_FinalProject_Husseini-T.git"
 author: "Tamera Husseini"
 fontsize: 12pt
@@ -38,6 +38,8 @@ library(sf)
 library(nationalparkcolors)
 library(cowplot)
 library(gridExtra)
+library(corrplot)
+library(here)
 # Set your ggplot theme
 
 my_theme <- theme_grey(base_size = 12) +
@@ -59,10 +61,12 @@ The US EPA defines Environmental Justice as *"the fair treatment and meaningful 
  
 In the State of California, CalEPA's Office of Environmental Health Hazard Assessment (OEHHA) released the CalEnviroScreen mapping tool in 2013. The CalEnviroScreen data set is based on 20 indicator data categorized broadly into four groups: exposures, environmental effects, sensitive populations and socioeconomic status. CalEnviroScreen's most important feature is its ability to produce rank scores of cumulative impacts for every census tract inthe state (Lee, 2020). More information about CalEnviroScreen can be accessed at https://oehha.ca.gov/calenviroscreen. 
 
-Using the CalEJScreen data set, this study aims to characterise Environmental Justice in the State of California by addressing the following questions:
+Using the CalEJScreen data set, this study aims to characterise Environmental Justice issues in a sample of 10 Californian counties by exploring the following questions:
 
 1. Which Exposure and Socio-economic indicators predict the presence of Sensitive Population?
 2. Which counties have the highest median rates of Asthma, Cardiovascular Disease and Low Birth Weight (Sensitive Population Indicators)
+
+The 10 California Counties used in the study were
 
 \newpage
 
@@ -70,9 +74,9 @@ Using the CalEJScreen data set, this study aims to characterise Environmental Ju
 
 The data set used in this study is an aggregate of environmental, health and socioeconomic indicator data for california 2010 census tract, downloaded from CalEnviroScreen 3.0 (https://oehha.ca.gov/calenviroscreen/maps-data/download-data.) an environmental justice mapping tool. The CalEnviroScreen data set combines 20 indicator data sets categorized broadly as : (1) exposure indicators, (2) enviornmental effects indicators, (3) sensitive population indicators and (4) socio-economic indicators. In addition to the raw indicator data includes a derived Pollution Burden score and Population Characteristic score, which were combined to produce a rank score of cumulative impacts.
 
-The full dataset was filtered down to the indicator variables shown in Table 1.
+The full dataset was filtered down to the indicator variables shown in Table 1. 
 
-```{r, echo = FALSE}
+```{r echo = FALSE}
 
 var.tbl <- read.csv("./docs/VariablesTable.csv")
 knitr::kable(var.tbl, "markdown", caption = "Description of Indicator Variables") 
@@ -84,43 +88,80 @@ knitr::kable(var.tbl, "markdown", caption = "Description of Indicator Variables"
 
 # Exploratory Analysis 
 
-Because it is not uncommon for socio-economic are commonly related with one another, 
-```{r}
+```{r echo=FALSE}
+#datawrangling
+colnames(caliEJscreen)
+
+filtered.data <- caliEJscreen %>% 
+  select(Census.Tract,California.County,CES.3.0.Score,Ozone,PM2.5,Diesel.PM,
+         Drinking.Water,Pesticides,Tox..Release,Traffic, Pollution.Burden.Score,
+         Asthma,Low.Birth.Weight,Cardiovascular.Disease,Education,
+         Linguistic.Isolation,Poverty,Unemployment,Housing.Burden,Pop..Char..Score)
+head(filtered.data)
+colnames(filtered.data)
+```
+
+```{r echo=FALSE, message = FALSE, fig.cap = "California 2010 census tracts"}
+
+# Mapping
+cali.map <- st_read("./data/data_spatial/CES3June2018Update.shp")
+st_crs(cali.map)
+head(cali.map)
+colnames(cali.map)
+
+#census tracts
+ggplot() +
+  geom_sf(data =cali.map) + 
+  theme_bw() # add this to make the background white and not grey
+
+#asthma
+ggplot(data = cali.map) +
+  geom_sf(aes(fill = asthma)) +
+  #geom_sf_text(aes(label = NAME)) +
+  theme_bw()
+
+#cardio
+ggplot(data = cali.map) +
+  geom_sf(aes(fill = cvd)) +
+  #geom_sf_text(aes(label = NAME), color = "white") +
+  theme_bw()
+
+#lbw
+ggplot(data = cali.map) +
+  geom_sf(aes(fill = lbw)) +
+  #geom_sf_text(aes(label = NAME), color = "white") +
+  theme_bw()
+
+```
+
+Because it is not uncommon for socio-economic to be related with one another, a Pearson's corelation test was used to test for correlation.  Poverty was strongly positively correlated with with Education (R = 0.82, p<0.01) and Housing Burden (R=0.72, p<0.01) and moderately corelated with Unemployment (R = 0.60, p<0.01) and Linguistic Isolation (R = 0.62, p<0.01). 
+
+```{r echo=FALSE, fig.cap="Correlation matric of socio-economic variables"}
+
 # Correlation between Socio-Economic Indicators
 cor.test(caliEJscreen$Poverty, caliEJscreen$Education) #strong correlation 
 cor.test(caliEJscreen$Poverty, caliEJscreen$Unemployment) 
 cor.test(caliEJscreen$Poverty, caliEJscreen$Housing.Burden) #strong correlation 
 cor.test(caliEJscreen$Poverty, caliEJscreen$Linguistic.Isolation)
-cor.test(caliEJscreen$Poverty, caliEJscreen$Education) #strong correlation
+
+socioecon.indic <- 
+  filtered.data %>% 
+  select(Education:Housing.Burden) %>% 
+  na.omit()
+
+socioecon.cor <-cor(socioecon.indic)
+#corrplot(socioecon.cor, method = "ellipse")  
+corrplot.mixed(socioecon.cor, upper = "ellipse", tl.pos = "d")
+
 ```
 
+```{r}
 
-```{r, fig.height = 6, fig.width = 4, warning = FALSE, fig.cap= "The effects of poverty on rates of asthma and cardiovascular disease in California census tract populations." }
+```
 
-
-#USE THIS ONE FOR VISUALISATION
-# asthma ~ poverty, CA
-asthma.poverty.ca <- ggplot(caliEJscreen, aes(y=Asthma, x= Poverty)) +
-  geom_point(alpha = 0.7) +
-  ylab("Asthma (Rate)")+
-  xlab("") +
-  geom_smooth(method="lm", se=FALSE, colour = "black")
+```{r, echo=FALSE, fig.cap= "" }
 
 
-# cardio ~ poverty, CA
-cardio.poverty.ca <- ggplot(caliEJscreen,aes(y=Cardiovascular.Disease, x= Poverty)) +
-  geom_point(alpha = 0.7) +
-  ylab("Cardiovascular Disease (Rate)")+
-  xlab("")+
-  geom_smooth(method="lm", se=FALSE, col = "black")
-
-# bw ~ poverty, CA
-bw.poverty.ca <- ggplot(caliEJscreen,aes(y=Low.Birth.Weight, x= Poverty)) +
-  geom_point(alpha = 0.7) + 
-  ylab("Low Birth Weight")+
-  geom_smooth(method="lm", se=FALSE, col = "black")
-
-visualisation <- grid.arrange(asthma.poverty.ca, cardio.poverty.ca,bw.poverty.ca, ncol=1)
 
 ```
 
@@ -129,67 +170,110 @@ visualisation <- grid.arrange(asthma.poverty.ca, cardio.poverty.ca,bw.poverty.ca
 \newpage
 
 # Analysis
-
-```{r}
-# Mapping
-
-cali.map <- st_read("./data/data_spatial/CES3June2018Update.shp")
-st_crs(cali.map)
-
-here()
-```
-
-
-
 ## Question 1: Which Exposure indicators predict the presence of Sensitive Population?
-
 
 A linear regression model was performed to test which Pollution Burden indicators predict the presence of Sensitive Populations. Three different response variables - Asthma  rates, Cardiovascular disease rates and low birth weight - were tested against a suite of Pollution Burden explanatory variables. 
 
 
-```{r}
+```{r echo = FALSE}
 
+# Asthma ~ Exposure
 
-# Asthma
+colnames(filtered.data)
 
-colnames(caliEJscreen)
-
-asthma.mdl <- lm(Asthma ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data =caliEJscreen) 
+asthma.mdl <- lm(Asthma ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = filtered.data) 
 summary(asthma.mdl)
 
-asthma.mdl2 <-lm (Asthma ~ Ozone + Diesel.PM + Traffic + Drinking.Water + Tox..Release, data =caliEJscreen)
+asthma.mdl2 <-lm (Asthma ~ Ozone + Diesel.PM + Traffic + Drinking.Water + Tox..Release, data = filtered.data)
 summary(asthma.mdl2)
 plot(asthma.mdl2)
 
-# Cardiovascular disease 
+# Cardiovascular disease ~ Exposure
 
-cardio.mdl <- lm(Cardiovascular.Disease ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = caliEJscreen)
+cardio.mdl <- lm(Cardiovascular.Disease ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = filtered.data)
 summary(cardio.mdl)
 
-cardio.mdl2 <- lm(Cardiovascular.Disease ~ Ozone + Diesel.PM + Drinking.Water + Traffic, data=caliEJscreen)
+cardio.mdl2 <- lm(Cardiovascular.Disease ~ Ozone + Diesel.PM + Drinking.Water + Traffic, data= filtered.data)
 summary(cardio.mdl2)
 plot(cardio.mdl2)
 
-# Birth weight
+# Birth weight ~ Exposure
 
 bw.mdl1 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = caliEJscreen) 
 summary (bw.mdl1)
 
-bw.md2 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM + Traffic  , data = caliEJscreen)
+bw.md2 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM + Traffic  , data = filtered.data)
 summary(bw.md2)
 
-bw.mdl3 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM  , data = caliEJscreen)
+bw.mdl3 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM  , data = filtered.data)
 summary(bw.mdl3)
 
+# Asthma ~ Poverty
+asthma.pv <- lm(Asthma ~ Poverty, data = filtered.data )
+summary(asthma.pv)
 
+# Cardio ~ Poverty
+cardio.pv <- lm(Cardiovascular.Disease ~ Poverty, data = filtered.data)
+summary(cardio.pv)
+
+# BW ~ Poverty 
+
+bw.pv <- lm(Low.Birth.Weight ~ Poverty, data = filtered.data)
+summary(bw.pv)
 
 ```
 
-## Question 2: Which socio-
+```{r echo = FALSE}
 
-or
+# asthma ~ poverty, CA
+asthma.poverty.ca <- ggplot(filtered.data,aes(y=Asthma, x= Poverty)) +
+  geom_point(alpha = 0.7) +
+  ylab("Cardiovascular Disease (Rate)")+
+  geom_smooth(method="lm", se=FALSE, colour = "black")
+asthma.poverty.ca
+```
+
+```{r, echo=FALSE, warning=FALSE}
+
+# cardio ~ poverty, CA
+cardio.poverty.ca <- ggplot(filtered.data,aes(y=Cardiovascular.Disease, x= Poverty)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method="lm", se=FALSE, col = "black")
+cardio.poverty.ca
+```
+
+```{r echo=FALSE}
+visualisation <- grid.arrange(asthma.poverty.ca, cardio.poverty.ca, ncol=1)
+visualisation
+
+#pm2.5 ~ poverty 
+pm25.poverty.ca <- ggplot(caliEJscreen,aes(y=PM2.5, x= Poverty)) +
+  geom_point(alpha = 0.7) +
+  ylab("PM 2.5")+
+  geom_smooth(method="lm", se=FALSE, colour = "black")
+pm25.poverty.ca
+
+```
+
 
 ## Question 2: Which counties have the highest median rate of Asthma, Cardiovascular and Low Birth Weight? 
+
+```{r echo=FALSE}
+
+county.asthma <- 
+  filtered.data %>% 
+  group_by(California.County) %>% 
+  summarise(mean.asthma = mean(Asthma),
+            mean.cvd = mean(Cardiovascular.Disease),
+            mean.lbw = mean(Low.Birth.Weight))
+
+summary(county.asthma)
+```
+
+```{r}
+box.sensitive.pop <- ggplot(coutny.asthma) %>% 
+  geom_boxplot()
+```
 
 \newpage
 
@@ -199,4 +283,5 @@ or
 \newpage
 
 # References
-<add references here if relevant, otherwise delete this section> 
+
+Lee, C. (2020) A Game Changer in the Making? Lessions from States advancing Environmental Justice through Mapp and Cumulative Impact Strategies. Environmental Law Institute. 
