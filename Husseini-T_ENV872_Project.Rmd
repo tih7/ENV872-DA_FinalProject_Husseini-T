@@ -40,6 +40,7 @@ library(cowplot)
 library(gridExtra)
 library(corrplot)
 library(here)
+library(viridis)
 # Set your ggplot theme
 
 my_theme <- theme_grey(base_size = 12) +
@@ -61,12 +62,11 @@ The US EPA defines Environmental Justice as *"the fair treatment and meaningful 
  
 In the State of California, CalEPA's Office of Environmental Health Hazard Assessment (OEHHA) released the CalEnviroScreen mapping tool in 2013. The CalEnviroScreen data set is based on 20 indicator data categorized broadly into four groups: exposures, environmental effects, sensitive populations and socioeconomic status. CalEnviroScreen's most important feature is its ability to produce rank scores of cumulative impacts for every census tract inthe state (Lee, 2020). More information about CalEnviroScreen can be accessed at https://oehha.ca.gov/calenviroscreen. 
 
-Using the CalEJScreen data set, this study aims to characterise Environmental Justice issues in a sample of 10 Californian counties by exploring the following questions:
+Using the CalEJScreen data set, this study aims to characterise Environmental Justice issues in a sample of 10 Californian counties (Fresno, LA, Madera, Modoc, Monterey, San Bernardina, Sand Diego, San Francisco, Sonoma, Yuba) by exploring the following questions:
 
-1. Which Exposure and Socio-economic indicators predict the presence of Sensitive Population?
-2. Which counties have the highest median rates of Asthma, Cardiovascular Disease and Low Birth Weight (Sensitive Population Indicators)
+1. Which Exposure indicators predict the presence of Sensitive Populations?
+2. Which Socioeconomic indicators predict the presence of Sensitive Populations?
 
-The 10 California Counties used in the study were
 
 \newpage
 
@@ -99,20 +99,25 @@ filtered.data <- caliEJscreen %>%
          Linguistic.Isolation,Poverty,Unemployment,Housing.Burden,Pop..Char..Score)
 head(filtered.data)
 colnames(filtered.data)
+
+# selecting counties
+summary(filtered.data$California.County)
+ten.counties <- filter(filtered.data, California.County %in% c("Los Angeles","San Diego","San Francisco","Sonoma ","Monterey ","Fresno ", "Madera ", "Modoc ", "Yuba ", "San Bernardino"))
+
+summary(ten.counties$California.County)
+class(cities$California.County)
+
+
 ```
+
 
 ```{r echo=FALSE, message = FALSE, fig.cap = "California 2010 census tracts"}
 
-# Mapping
+# geospatial mapping
 cali.map <- st_read("./data/data_spatial/CES3June2018Update.shp")
 st_crs(cali.map)
 head(cali.map)
 colnames(cali.map)
-
-#census tracts
-ggplot() +
-  geom_sf(data =cali.map) + 
-  theme_bw() # add this to make the background white and not grey
 
 #asthma
 ggplot(data = cali.map) +
@@ -123,18 +128,69 @@ ggplot(data = cali.map) +
 #cardio
 ggplot(data = cali.map) +
   geom_sf(aes(fill = cvd)) +
-  #geom_sf_text(aes(label = NAME), color = "white") +
   theme_bw()
 
 #lbw
 ggplot(data = cali.map) +
   geom_sf(aes(fill = lbw)) +
-  #geom_sf_text(aes(label = NAME), color = "white") +
   theme_bw()
 
 ```
 
-Because it is not uncommon for socio-economic to be related with one another, a Pearson's corelation test was used to test for correlation.  Poverty was strongly positively correlated with with Education (R = 0.82, p<0.01) and Housing Burden (R=0.72, p<0.01) and moderately corelated with Unemployment (R = 0.60, p<0.01) and Linguistic Isolation (R = 0.62, p<0.01). 
+
+
+```{r echo=FALSE}
+#which counties have the highest rates of asthma, cvd and lbw? 
+county.sensitive <- 
+  ten.counties %>% 
+  group_by(California.County) %>% 
+  summarise(mean.asthma = mean(Asthma),
+            mean.cvd = mean(Cardiovascular.Disease),
+            mean.lbw = mean(Low.Birth.Weight))
+
+summary(county.sensitive)
+
+```
+
+Sensitive populations were explored at the county level. 
+
+```{r fig.cap="Asthma Rates in 10 California Counties"}
+# asthma rastes by county
+county.box <- ggplot(ten.counties) + 
+  geom_boxplot(aes(x= California.County, y=Asthma, colour = California.County)) +
+  labs( y = "Asthma (Hospitalization Rate", x="County") +
+  theme(axis.text.x  = element_text(angle = 30)) +
+  scale_color_viridis(discrete = TRUE) +
+  theme(legend.position = " ") +
+  ylim(0,200)
+county.box
+
+```
+
+```{r fig.cap="Hospitalization rate for Cardiovascular Disease in 10 California counties"}
+# cvd rates by county
+county.box2 <- ggplot(ten.counties) + 
+  geom_boxplot(aes(x= California.County, y=Cardiovascular.Disease, colour = California.County)) +
+  labs( y = "Cardiovascular Disease (Hospitalization rate)", x="County") +
+  scale_color_viridis(discrete = TRUE) +
+  theme(axis.text.x = element_text(angle = 30)) +
+  theme(legend.position = " ")
+county.box2
+```
+
+```{r fig.cap= "Percentage low birth weight in 10 California Counties"}
+#lbw by county
+county.box3 <- ggplot(ten.counties) + 
+  geom_boxplot(aes(x= California.County, y=Low.Birth.Weight, colour = California.County)) +
+  labs( y = "Low Birth Weight (%)", x="County") +
+  theme(axis.text.x = element_text(angle = 30)) +
+  scale_color_viridis(discrete = TRUE) +
+  theme(legend.position = " ")
+county.box3
+
+```
+
+Because it is typical for socio-economic factors to be related with one another, a Pearson's correlation test was used to test for correlation betweem the socioeconomic factors.  Poverty was strongly positively correlated with with Education (R = 0.82, p<0.01) and Housing Burden (R=0.72, p<0.01) and moderately corelated with Unemployment (R = 0.60, p<0.01) and Linguistic Isolation (R = 0.62, p<0.01). 
 
 ```{r echo=FALSE, fig.cap="Correlation matric of socio-economic variables"}
 
@@ -154,19 +210,6 @@ socioecon.cor <-cor(socioecon.indic)
 corrplot.mixed(socioecon.cor, upper = "ellipse", tl.pos = "d")
 
 ```
-
-```{r}
-
-```
-
-```{r, echo=FALSE, fig.cap= "" }
-
-
-
-```
-
-
-
 \newpage
 
 # Analysis
@@ -179,15 +222,46 @@ A linear regression model was performed to test which Pollution Burden indicator
 
 # Asthma ~ Exposure
 
-colnames(filtered.data)
+colnames(ten.counties)
 
-asthma.mdl <- lm(Asthma ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = filtered.data) 
+asthma.mdl <- lm(Asthma ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = ten.counties) 
 summary(asthma.mdl)
 
-asthma.mdl2 <-lm (Asthma ~ Ozone + Diesel.PM + Traffic + Drinking.Water + Tox..Release, data = filtered.data)
+asthma.mdl2 <-lm (Asthma ~ Ozone + Diesel.PM + Drinking.Water + Tox..Release, data = ten.counties)
 summary(asthma.mdl2)
 plot(asthma.mdl2)
 
+asthma.mdl3 <-lm (Asthma ~ Ozone + Diesel.PM + Drinking.Water, data = ten.counties)
+summary(asthma.mdl3)
+
+# Plots
+#2 Asthma ~ ozone
+
+asthma.o3 <- ggplot(ten.counties, aes(x=Ozone, y= Asthma, colour= California.County)) +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE)+
+  geom_smooth(method = "lm", colour= "black", se=FALSE)
+asthma.o3
+
+#3 Asthma ~ Diesel
+
+asthma.dis <- ggplot(ten.counties, aes(x=Diesel.PM, y= Asthma, colour= California.County)) +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE)+
+  geom_smooth(method = "lm", colour= "black", se=FALSE)
+asthma.dis
+
+#4 Asthma ~ drinking water
+
+asthma.dw <- ggplot(ten.counties, aes(x=Drinking.Water, y= Asthma, colour= California.County)) +
+  geom_point() +
+  scale_color_viridis(discrete = TRUE)+
+  geom_smooth(method = "lm", colour= "black", se=FALSE)
+asthma.dw
+
+```
+
+```{r}
 # Cardiovascular disease ~ Exposure
 
 cardio.mdl <- lm(Cardiovascular.Disease ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = filtered.data)
@@ -207,19 +281,6 @@ summary(bw.md2)
 
 bw.mdl3 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM  , data = filtered.data)
 summary(bw.mdl3)
-
-# Asthma ~ Poverty
-asthma.pv <- lm(Asthma ~ Poverty, data = filtered.data )
-summary(asthma.pv)
-
-# Cardio ~ Poverty
-cardio.pv <- lm(Cardiovascular.Disease ~ Poverty, data = filtered.data)
-summary(cardio.pv)
-
-# BW ~ Poverty 
-
-bw.pv <- lm(Low.Birth.Weight ~ Poverty, data = filtered.data)
-summary(bw.pv)
 
 ```
 
@@ -256,29 +317,68 @@ pm25.poverty.ca
 ```
 
 
-## Question 2: Which counties have the highest median rate of Asthma, Cardiovascular and Low Birth Weight? 
+## Question 2: Which Socioeconomic indicators predict the presence of Sensitive Populations?
 
-```{r echo=FALSE}
+Because Poverty was found to be positively corelated with other socio-economic factors in the dataset, it was used as a blanket factor to test the relationship between socio-economic indicators and sensitive population indicators. Poverty was found to be significantly related to Asthma (R^2^ = 0.238, d.f. =), cardiovascular disease (), and low Birth Weight.  
 
-county.asthma <- 
-  filtered.data %>% 
-  group_by(California.County) %>% 
-  summarise(mean.asthma = mean(Asthma),
-            mean.cvd = mean(Cardiovascular.Disease),
-            mean.lbw = mean(Low.Birth.Weight))
+```{r echo=FALSE, fig.cap="The relationship between poverty and sensitive population indicators"}
 
-summary(county.asthma)
+#LR models
+
+# Asthma ~ Poverty
+asthma.pv <- lm(Asthma ~ Poverty, data = filtered.data )
+summary(asthma.pv)
+
+# Cardio ~ Poverty
+cardio.pv <- lm(Cardiovascular.Disease ~ Poverty, data = filtered.data)
+summary(cardio.pv)
+
+# BW ~ Poverty 
+bw.pv <- lm(Low.Birth.Weight ~ Poverty, data = filtered.data)
+summary(bw.pv)
+
+#scatterplot
+
+#1 Asthma ~ Poverty
+asthma.pov.plot<- ggplot(ten.counties, aes(y=Asthma, x= Poverty, colour= California.County)) +
+  geom_point(alpha = 0.7) +
+  ylab("Asthma (ER visits per 10,000)")+
+  scale_color_viridis(discrete = TRUE) +
+  geom_smooth(method="lm", se=FALSE, colour = "black")+
+  theme(legend.position = " ")
+#asthma.pov.plot
+
+#2 cvd ~ poverty
+cvd.pov.plot<- ggplot(ten.cali.counties, aes(y=Cardiovascular.Disease, x= Poverty, colour= California.County)) +
+  geom_point(alpha = 0.7) +
+  ylab("Cardiovascular Disease (ER visits per 10,000)")+
+  scale_color_viridis(discrete = TRUE) +
+  geom_smooth(method="lm", se=FALSE, colour = "black")+
+  theme(legend.position = " ")
+#cvd.pov.plot
+
+#lbw ~ poverty
+lbw.pov.plot<- ggplot(ten.cali.counties, aes(y=Low.Birth.Weight, x= Poverty, colour= California.County)) +
+  geom_point(alpha = 0.7) +
+  ylab("Low Birth Weight (%)")+
+  scale_color_viridis(discrete = TRUE) +
+  geom_smooth(method="lm", se=FALSE, colour = "black")+
+  theme(legend.position = " ")
+#lbw.pov.plot
+
+
+#legend
+legend<- get_legend(asthmaplot + theme(legend.position = "bottom", legend.direction = "vertical"))
+
+viz<- plot_grid(asthma.pov.plot, lbw.pov.plot,cvd.pov.plot, legend,nrow =1)
+viz
 ```
 
-```{r}
-box.sensitive.pop <- ggplot(coutny.asthma) %>% 
-  geom_boxplot()
-```
 
 \newpage
 
 # Summary and Conclusions
-
+The connection between, poverty (and other socioeconomic factors) and environmental health is evident in this data set. 
 
 \newpage
 
