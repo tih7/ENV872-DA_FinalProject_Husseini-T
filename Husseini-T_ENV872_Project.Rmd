@@ -55,9 +55,14 @@ caliEJscreen <- read.csv("./data/data_raw/cali_ej_screen.csv")
 
 # Rationale and Research Questions
 
-Environmental Justice is defined by the US EPA as *"the fair treatment and meaningful involvement of all people regardless of race, colour, national origin, or income, with respect to the development , implementation and  enforcement of environmental laws, regularions and policies."* 
+The US EPA defines Environmental Justice as *"the fair treatment and meaningful involvement of all people regardless of race, colour, national origin, or income, with respect to the development , implementation and  enforcement of environmental laws, regularions and policies."* Sparked by the protests against the construction of a hazardous waste landfill in Warren County, North Carolina in 1982, the Environmental Justice has slowly taken root in U.S. policy-making. The events in Warren County began to shed light on the disproportionate effect of environmental impacts on low-income communities, communities of colour and indigenous people.  Following the directives of Executive Order 12898 , federal and state authorities have developed online open-source mapping tools to help identify and prioritizing communities experiencing disproportionate environmental burdens. 
  
+In the State of California, CalEPA's Office of Environmental Health Hazard Assessment (OEHHA) released the CalEnviroScreen mapping tool in 2013. The CalEnviroScreen data set is based on 20 indicator data categorized broadly into four groups: exposures, environmental effects, sensitive populations and socioeconomic status. CalEnviroScreen's most important feature is its ability to produce rank scores of cumulative impacts for every census tract inthe state (Lee, 2020). More information about CalEnviroScreen can be accessed at https://oehha.ca.gov/calenviroscreen. 
 
+Using the CalEJScreen data set, this study aims to characterise Environmental Justice in the State of California by addressing the following questions:
+
+1. Which Exposure and Socio-economic indicators predict the presence of Sensitive Population?
+2. Which counties have the highest median rates of Asthma, Cardiovascular Disease and Low Birth Weight (Sensitive Population Indicators)
 
 \newpage
 
@@ -163,6 +168,14 @@ visualisation <- grid.arrange(asthma.poverty.ca, cardio.poverty.ca,bw.poverty.ca
 
 # Analysis
 
+```{r}
+# Mapping
+
+
+```
+
+
+
 ## Question 1: Which Exposure indicators predict the presence of Sensitive Population?
 
 
@@ -170,6 +183,13 @@ A linear regression model was performed to test which Pollution Burden indicator
 
 
 ```{r}
+# Correlation between Socio-Economic Indicators
+cor.test(caliEJscreen$Poverty, caliEJscreen$Education) #strong correlation 
+cor.test(caliEJscreen$Poverty, caliEJscreen$Unemployment) 
+cor.test(caliEJscreen$Poverty, caliEJscreen$Housing.Burden) #strong correlation 
+cor.test(caliEJscreen$Poverty, caliEJscreen$Linguistic.Isolation)
+cor.test(caliEJscreen$Poverty, caliEJscreen$Education) #strong correlation
+
 # Asthma
 
 colnames(caliEJscreen)
@@ -195,7 +215,13 @@ plot(cardio.mdl2)
 bw.mdl1 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = caliEJscreen) 
 summary (bw.mdl1)
 
-bw.md1 <- lm()
+bw.md2 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM + Traffic  , data = caliEJscreen)
+summary(bw.md2)
+
+bw.mdl3 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM  , data = caliEJscreen)
+summary(bw.mdl3)
+
+
 
 ```
 
