@@ -5,11 +5,12 @@ output:
     fig_caption: yes
     number_sections: yes
 geometry: margin=2.54cm
-title: "Environmental Justice in the State of California"
+title: "Environmental Health and Justice in California"
 subtitle: "https://github.com/tih7/ENV872-DA_FinalProject_Husseini-T.git"
 author: "Tamera Husseini"
 fontsize: 12pt
 mainfont: Times New Roman
+
 
 ---
 
@@ -29,10 +30,17 @@ getwd()
 # Load your packages
 
 library(tidyverse)
-
+library(lubridate)
+library(nlme)
+library(lme4)
+library(corrplot)
+library(sf)
+library(nationalparkcolors)
+library(cowplot)
+library(gridExtra)
 # Set your ggplot theme
 
-my_theme <- theme_light(base_size = 12) +
+my_theme <- theme_grey(base_size = 12) +
   theme(axis.text = element_text(color = "black"), 
         legend.position = "right")
   
@@ -41,27 +49,113 @@ theme_set(my_theme)
 # Load your datasets
 
 caliEJscreen <- read.csv("./data/data_raw/cali_ej_screen.csv")
+
 ```
 
 
 # Rationale and Research Questions
 
+Environmental Justice is defined by the US EPA as *"the fair treatment and meaningful involvement of all people regardless of race, colour, national origin, or income, with respect to the development , implementation and  enforcement of environmental laws, regularions and policies."* 
+ 
 
 
 \newpage
 
 # Dataset Information
 
-The data set used in this study is an aggregate of environmental, health and socioeconomic indicator data for the State of California, downloaded from CalEnviroScreen 3.0, an environmental justice mapping tool developed by the California Office of Environmental Health Hazard Assessment (OEHHA). The CalEnviroScreen data set combines 20 indicator datas categorized broadly as : (1) geographic and demographic data, (2) exposure indicators, (3) enviornmental effects indicators, (4) sensitive population indicators and (5) socio-economic indicators. In addition to the raw indicator data,  derive a rank score. An area with a high score is one that experiences a much higher pollution burden than areas with low scores. The tool was designed to help identify California communities that are most affected by many sources of pollution. The data is divided along 2010 census tracts and is up-to-date as of 2018. 
+The data set used in this study is an aggregate of environmental, health and socioeconomic indicator data for the State of California, downloaded from CalEnviroScreen 3.0, an environmental justice mapping tool developed by the California Office of Environmental Health Hazard Assessment (OEHHA). The CalEnviroScreen data set combines 20 indicator data sets categorized broadly as : (1) exposure indicators, (2) enviornmental effects indicators, (3) sensitive population indicators and (4) socio-economic indicators. In addition to the indicator data, 
+
+derive a rank score. 
+
+An area with a high score is one that experiences a much higher pollution burden than areas with low scores. The tool was designed to help identify California communities that are most affected by many sources of pollution. The data is divided along 2010 census tracts and is up-to-date as of 2018. 
 
 More information about CalEnviroScreen 3.0 can be found here: https://oehha.ca.gov/calenviroscreen/about-calenviroscreen
 
+Geographic and Demographic Data:
+
+**Census Tract**: Census tract ID from the 2010 census.
+* Total Population: 2010 census tract population
+**California County**: California county name in which the tract is located
+* ZIP: Postal zip code in which tract is located
+* Nearby City: closest city to census tract to help approximate census tract location
+* Longtitude:Longtitude at the center of the census tract in decimal degrees
+* Latitude: Latitude of the census in decimal degrees
+
+CaliEnvironScreen Rank Score
+
+* CES 3.0 Score: CalEnviroScreen Score, Pollution Score multiplied by Population Characteristics Score
+* CES 3.0 Percentile: Percentile of the CalEnviroScreen score
+* CES 3.0 Percentile Range: Percentile of the CalEnviroScreen score
+* SB 535 Disadvantaged Community: Disadvantaged communities list from:
+https://oehha.ca.gov/calenviroscreen/sb535
+http://www.calepa.ca.gov/EnvJustice/GHGInvest/ 
+
+
+Exposure Indicators: 
+
+* Ozone: Amount of daily max. 8hr Ozone concentration
+* PM2.5: Annual mean PM 2.5 concentration
+* Diesel PM: Diesel PM emission from on-road and non-road sources
+* Drinking Water: Drinking water contaminant index for selected contaminnats
+* Pesticides: Total pounds of selected active pesticide ingredients (filtered for hazard and volatility) used in production-agriculture per square mile in the census tract.
+* Tox. Release: Toxicity-weighted concentrations of modeled chemical releases to air from facility emissions and off-site incineration (from RSEI)
+* Traffic: Traffic density, in vehicle-kilometers per hour per road length, within 150 meters of the census tract boundary
+
+Environmental Effects Indicators:
+
+* Cleanup Sites: Traffic density, in vehicle-kilometers per hour per road length, within 150 meters of the census tract boundary
+* Groundwater Threats:Groundwater threats, sum of weighted GeoTracker leaking underground storage tank sites  within buffered distances to populated blocks of census tracts
+* Haz. Waste: Sum of weighted hazardous waste facilities and large quantity generators within buffered distances to populated blocks of census tracts.
+*Imp. Water Bodies: Impaired water bodies, sum of number of pollutants across all impaired water bodies within buffered distances to populated blocks of census tracts. 
+* Solid Waste:Sum of weighted hazardous waste facilities and large quantity generators within buffered distances to populated blocks of census tracts
+
+Sensitive Population Indicators:
+
+* Asthma: Age-adjusted rate of emergency department visits for asthma
+* Low Birth Weight: Percent low birth weigth
+* Cardiovascular Disease: Age-adjusted rate of emergency dept. visits for heart attacks per 10,000.
+
+Socio-economic Factor Indicators:
+
+* Education: Percent of population living below two times the federal poverty level
+* Linguistic Isolation: Percent limited English speaking households.
+* Poverty: Percent of population living below two times the federal poverty level.
+* Unemployment: Percent of the population over the age of 16 that is unemployed and eligible for the labor force.
+* Housing Burden: Percent housing burdened low income households. 
 
 
 
 \newpage
 
 # Exploratory Analysis 
+```{r, fig.height = 6, fig.width = 4, warning = FALSE, fig.cap= "The effects of poverty on rates of asthma and cardiovascular disease in California census tract populations." }
+
+
+#USE THIS ONE FOR VISUALISATION
+# asthma ~ poverty, CA
+asthma.poverty.ca <- ggplot(caliEJscreen, aes(y=Asthma, x= Poverty)) +
+  geom_point(alpha = 0.7, colour = everglades[2]) +
+  ylab("Asthma (Rate)")+
+  xlab("") +
+  geom_smooth(method="lm", se=FALSE, colour = "black")
+
+
+# cardio ~ poverty, CA
+cardio.poverty.ca <- ggplot(caliEJscreen,aes(y=Cardiovascular.Disease, x= Poverty)) +
+  geom_point(alpha = 0.7, col = everglades[3]) +
+  ylab("Cardiovascular Disease (Rate)")+
+  xlab("")+
+  geom_smooth(method="lm", se=FALSE, col = "black")
+
+# bw ~ poverty, CA
+bw.poverty.ca <- ggplot(caliEJscreen,aes(y=Low.Birth.Weight, x= Poverty)) +
+  geom_point(alpha = 0.7, col = everglades[4]) + 
+  ylab("Low Birth Weight")+
+  geom_smooth(method="lm", se=FALSE, col = "black")
+
+visualisation <- grid.arrange(asthma.poverty.ca, cardio.poverty.ca,bw.poverty.ca, ncol=1)
+
+```
 
 
 
@@ -69,14 +163,47 @@ More information about CalEnviroScreen 3.0 can be found here: https://oehha.ca.g
 
 # Analysis
 
+## Question 1: Which Exposure indicators predict the presence of Sensitive Population?
 
 
-## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
-
-## Question 2: 
+A linear regression model was performed to test which Pollution Burden indicators predict the presence of Sensitive Populations. Three different response variables - Asthma  rates, Cardiovascular disease rates and low birth weight - were tested against a suite of Pollution Burden explanatory variables. 
 
 
+```{r}
+# Asthma
 
+colnames(caliEJscreen)
+
+asthma.mdl <- lm(Asthma ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data =caliEJscreen) 
+summary(asthma.mdl)
+
+asthma.mdl2 <-lm (Asthma ~ Ozone + Diesel.PM + Traffic + Drinking.Water + Tox..Release, data =caliEJscreen)
+summary(asthma.mdl2)
+plot(asthma.mdl2)
+
+# Cardiovascular disease 
+
+cardio.mdl <- lm(Cardiovascular.Disease ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = caliEJscreen)
+summary(cardio.mdl)
+
+cardio.mdl2 <- lm(Cardiovascular.Disease ~ Ozone + Diesel.PM + Drinking.Water + Traffic, data=caliEJscreen)
+summary(cardio.mdl2)
+plot(cardio.mdl2)
+
+# Birth weight
+
+bw.mdl1 <- lm(Low.Birth.Weight ~ Ozone + PM2.5 + Diesel.PM + Traffic + Drinking.Water + Tox..Release + Pesticides, data = caliEJscreen) 
+summary (bw.mdl1)
+
+bw.md1 <- lm()
+
+```
+
+## Question 2: Which socio-
+
+or
+
+## Question 2: Which counties have the highest median rate of Asthma, Cardiovascular and Low Birth Weight? 
 
 \newpage
 
